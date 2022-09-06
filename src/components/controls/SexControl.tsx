@@ -1,16 +1,23 @@
 import { Fragment, useCallback } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
+import { Sex } from '../../types/Sexes';
+import { SexEventHandler } from '../../types/EventHandlers';
 
-const options = [
-  { value: 'Females', label: 'Females' },
-  { value: 'Males', label: 'Males' },
-  { value: 'Both sexes', label: 'Both sexes' },
-];
+const options = Object.values(Sex).map((sex) => ({
+  value: sex,
+  label: sex,
+}));
 
-export default function SexControl({ onChange, value }) {
-  const handleChange = useCallback(
-    (event) => {
-      onChange(event.target.value);
+export interface ISexControlProps {
+  value: Sex,
+  onChange: SexEventHandler,
+}
+
+
+export default function SexControl({ onChange, value }: ISexControlProps) {
+  const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(event.target.value as Sex);
     },
     [onChange],
   );
@@ -35,9 +42,4 @@ export default function SexControl({ onChange, value }) {
       </div>
     </div>
   );
-}
-
-SexControl.propTypes = {
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
 }

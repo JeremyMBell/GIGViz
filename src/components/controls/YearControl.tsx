@@ -1,12 +1,22 @@
 import { useCallback } from 'react';
-import PropTypes from 'prop-types';
 
 import './YearControl.css';
+import React from 'react';
+import { YearEventHandler } from '../../types/EventHandlers';
 
-export default function YearControl({ max, min, onChange, step = 1, value }) {
-  const handelChange = useCallback(
+
+export interface IYearControlProps {
+  max: number,
+  min: number,
+  step?: number,
+  value: number,
+  onChange: YearEventHandler,
+}
+
+export default function YearControl({ max, min, onChange, step = 1, value }: IYearControlProps) {
+  const handelChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (event) => {
-      onChange(event.target.value);
+      onChange(parseInt(event.target.value));
     },
     [onChange],
   );
@@ -29,12 +39,4 @@ export default function YearControl({ max, min, onChange, step = 1, value }) {
       <span className="control-year__value">{value}</span>
     </div>
   );
-}
-
-YearControl.propTypes = {
-  max: PropTypes.number.isRequired,
-  min: PropTypes.number.isRequired,
-  step: PropTypes.number,
-  value: PropTypes.number.isRequired,
-  onChange: PropTypes.func.isRequired,
 }

@@ -1,3 +1,4 @@
+import React from 'react';
 import './Viz.css';
 
 export default function Viz() {
