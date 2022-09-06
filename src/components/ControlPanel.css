@@ -1,0 +1,19 @@
+.control-panel {
+  border: solid 1px #777;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  margin: 8px;
+  width: 20em;
+}
+
+.control {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: row;
+  margin: 0.5em;
+}
+
+.control__label {
+  flex: 1 1 auto;
+}
