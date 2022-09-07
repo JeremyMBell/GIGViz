@@ -13,7 +13,7 @@ phases:
       - export REACT_BUILD_S3_BUCKET=gig-viz-assets
       - export REACT_BUILD_S3_FOLDER=$(date -Iminutes)
       - export REACT_BUILD_S3_URL=s3://$REACT_BUILD_S3_BUCKET/$REACT_BUILD_S3_FOLDER
-      - aws s3 cp ./build $REACT_BUILD_S3_URL
+      - aws s3 cp ./build $REACT_BUILD_S3_URL --recursive
       - ./create-template-config
       - aws cloudformation package --template-file template.yml --s3-bucket $BUCKET --output-template-file outtemplate.yml
 artifacts:
