@@ -32,31 +32,6 @@ Parameters:
     Type: String
     Default: 'Z09910652KP60OXVB7Q2G'
 Resources:
-  AssetsBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref AssetsBucketName
-  PutAssetsBucketRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName: S3PutAssetsRole
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Action: sts:AssumeRole
-            Principal:
-              Service: codebuild.amazonaws.com
-      Policies:
-        - PolicyName: PutAssetsBucket
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - s3:PutObject
-                  - s3:PutObjectAcl
-                Resource: !GetAtt AssetsBucket.Arn
   AssetsDistributionIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
     Properties:
@@ -65,7 +40,7 @@ Resources:
   AssetsReadPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref AssetsBucket
+      Bucket: !Ref AssetsBucketName
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -73,7 +48,7 @@ Resources:
             Principal:
               AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${AssetsDistributionIdentity}'
             Action: 's3:GetObject'
-            Resource: !Sub 'arn:aws:s3:::${AssetsBucket}/${AssetsFolder}/*'
+            Resource: !Sub 'arn:aws:s3:::${AssetsBucketName}/${AssetsFolder}/*'
   AssetsDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
