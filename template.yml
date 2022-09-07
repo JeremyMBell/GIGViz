@@ -50,7 +50,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub 'arn:aws:cloudfront::${Account}:${AssetsDistribution}'
+              AWS: !Sub 'arn:aws:cloudfront::${Account}:distribution/${AssetsDistribution}'
             Action: 's3:GetObject'
             Resource: !Sub 'arn:aws:s3:::${AssetsBucketName}/${AssetsFolder}/*'
   AssetsDistribution:
