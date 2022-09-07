@@ -11,10 +11,6 @@ Parameters:
     Description: "Domain to access assets"
     Type: String
     Default: gig-viz.jeremymbell.com
-  HostedZoneId:
-    Description: "Hosted Zone Id in which you want to add record"
-    Type: String
-    Default: Z09910652KP60OXVB7Q2G
   Region:
     Description: "AWS Region the resources exist in"
     Type: String
@@ -31,6 +27,10 @@ Parameters:
     Description: "Cache policy ID for managed cache policies https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html"
     Type: String
     Default: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad'
+  HostedZoneId:
+    Description: "ID of the domain in Route53"
+    Type: String
+    Default: 'Z09910652KP60OXVB7Q2G'
 Resources:
   AssetsBucket:
     Type: AWS::S3::Bucket
@@ -102,3 +102,11 @@ Resources:
         ViewerCertificate:
           AcmCertificateArn: !Ref AcmCertificate
           SslSupportMethod: sni-only
+  AcmCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Sub '*.${RootDomain}'
+      DomainValidationOptions:
+        - DomainName: !Ref AssetsDomain
+          HostedZoneId: !Ref HostedZoneId
+      ValidationMethod: 'DNS'
