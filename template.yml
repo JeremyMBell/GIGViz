@@ -58,7 +58,7 @@ Resources:
         Aliases:
           - !Ref AssetsDomain
         Origins:
-          - DomainName: !Sub '${AssetsBucket}.s3.${Region}.amazonaws.com'
+          - DomainName: !Sub '${AssetsBucketName}.s3.${Region}.amazonaws.com'
             OriginPath: !Sub '/${AssetsFolder}'
             Id: S3AssetsOrigin
             S3OriginConfig:
