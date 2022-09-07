@@ -31,6 +31,10 @@ Parameters:
     Description: "ID of the domain in Route53"
     Type: String
     Default: 'Z09910652KP60OXVB7Q2G'
+  Account:
+    Description: 'Account number'
+    Type: String
+    Default: '239630271253'
 Resources:
   AssetsDistributionIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
@@ -46,7 +50,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${AssetsDistributionIdentity}'
+              AWS: !Sub 'arn:aws:cloudfront::${Account}:${AssetsDistribution}'
             Action: 's3:GetObject'
             Resource: !Sub 'arn:aws:s3:::${AssetsBucketName}/${AssetsFolder}/*'
   AssetsDistribution:
