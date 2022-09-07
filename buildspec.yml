@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 16  
+    commands:
+      - npm install
+  build:
+    commands:
+      - npm run build
+      - export BUCKET=codebuild-us-east-1-510690132021
+      - export REACT_BUILD_S3_BUCKET=gig-viz-assets
+      - export REACT_BUILD_S3_FOLDER=$(date -Iminutes)
+      - export REACT_BUILD_S3_URL=s3://$REACT_BUILD_S3_BUCKET/$REACT_BUILD_S3_FOLDER
+      - aws s3 cp ./build $REACT_BUILD_S3_URL
+      - echo "{\"Parameters\": {\"AssetsBucketName\": \"$REACT_BUILD_S3_BUCKET\", \"AssetsFolder\": \"$REACT_BUILD_S3_FOLDER\"}}" > template-config.json
+      - aws cloudformation package --template-file template.yml --s3-bucket $BUCKET --output-template-file outtemplate.yml
+# Include only the files required for your application to run.
+# Do not use recursively include artifacts from node_modules directory as it will include unnecessary packages 
+# used only for building and testing.
+# ExpressJS apps will need other artifact directories included (bin/*, public/*, routes/*, views/* etc).
+artifacts:
+  files:
+    - template-config.json
+    - outtemplate.yml
+    - template.yml

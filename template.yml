@@ -1,0 +1,104 @@
+
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Outputs the time
+Parameters:
+  RootDomain:
+    Description: "Domain purchased by registrar"
+    Type: String
+    Default: jeremymbell.com
+  AssetsDomain:
+    Description: "Domain to access assets"
+    Type: String
+    Default: gig-viz.jeremymbell.com
+  HostedZoneId:
+    Description: "Hosted Zone Id in which you want to add record"
+    Type: String
+    Default: Z09910652KP60OXVB7Q2G
+  Region:
+    Description: "AWS Region the resources exist in"
+    Type: String
+    Default: us-east-1
+  AssetsBucketName:
+    Description: "Name of bucket the assets exist in"
+    Type: String
+    Default: ''
+  AssetsFolder:
+    Description: "Folder within AssetsBucketName that the assets exist in"
+    Type: String
+    Default: ''
+  CachingDisabled:
+    Description: "Cache policy ID for managed cache policies https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html"
+    Type: String
+    Default: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad'
+Resources:
+  AssetsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref AssetsBucketName
+  PutAssetsBucketRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: S3PutAssetsRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRole
+            Principal:
+              Service: codebuild.amazonaws.com
+      Policies:
+        - PolicyName: PutAssetsBucket
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:PutObjectAcl
+                Resource: !GetAtt AssetsBucket.Arn
+  AssetsDistributionIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: 'origin identity'
+  AssetsReadPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref AssetsBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity ${AssetsDistributionIdentity}'
+            Action: 's3:GetObject'
+            Resource: !Sub 'arn:aws:s3:::${AssetsBucket}/${AssetsFolder}/*'
+  AssetsDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: 'Serves a static website'
+        Aliases:
+          - !Ref AssetsDomain
+        Origins:
+          - DomainName: !Sub '${AssetsBucket}.s3.${Region}.amazonaws.com'
+            OriginPath: !Sub '/${AssetsFolder}'
+            Id: S3AssetsOrigin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub 'origin-access-identity/cloudfront/${AssetsDistributionIdentity}'
+        DefaultCacheBehavior:
+          CachePolicyId: !Ref CachingDisabled
+          AllowedMethods:
+            - GET
+            - HEAD
+          TargetOriginId: S3AssetsOrigin
+          ForwardedValues:
+            QueryString: 'false'
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+        ViewerCertificate:
+          AcmCertificateArn: !Ref AcmCertificate
+          SslSupportMethod: sni-only
