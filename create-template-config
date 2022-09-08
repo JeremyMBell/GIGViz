@@ -1,3 +1,0 @@
-#!/usr/bin/sh
-
-echo "{\"Parameters\": {\"AssetsBucketName\": \"$REACT_BUILD_S3_BUCKET\", \"AssetsFolder\": \"$REACT_BUILD_S3_FOLDER\"}}" > template-config.json
