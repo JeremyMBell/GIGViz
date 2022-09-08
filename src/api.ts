@@ -1,25 +1,29 @@
 import axios from 'axios';
+import { ILocationMetadata } from './types/api/ILocationMetadata';
+import { IMetadataResponse } from './types/api/IMetadataResponse';
+import { ISexMetadata } from './types/api/ISexMetadata';
+import { IYearMetadata } from './types/api/IYearMetadata';
 
 const api = axios.create({
   baseURL: 'https://vizhub.healthdata.org/data-viz-challenge-api/api/',
 });
 
 export async function fetchLocationMetadata() {
-  const { data } = await api.get('metadata/location');
+  const { data } = await api.get<ILocationMetadata[]>('metadata/location');
   return data;
 }
 
 export async function fetchSexMetadata() {
-  const { data } = await api.get('metadata/sex');
+  const { data } = await api.get<ISexMetadata[]>('metadata/sex');
   return data;
 }
 
 export async function fetchYearMetadata() {
-  const { data } = await api.get('metadata/year');
+  const { data } = await api.get<IYearMetadata[]>('metadata/year');
   return data;
 }
 
-export async function fetchMetadata() {
+export async function fetchMetadata(): Promise<IMetadataResponse> {
   const [location, sex, year] = await Promise.all([
     fetchLocationMetadata(),
     fetchSexMetadata(),
@@ -34,8 +38,8 @@ export async function fetchMetadata() {
 }
 
 export async function fetchCitation() {
-  const { data } = await api.get('citation');
-  return data;
+  const { data } = await api.get<{citation: string}>('citation');
+  return data.citation;
 }
 
 /**

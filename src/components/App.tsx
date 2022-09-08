@@ -1,30 +1,24 @@
-import React from 'react';
+import React, { useReducer, useState } from 'react';
 import { useEffect } from 'react';
 
 import * as api from '../api';
+import { IMetadataResponse } from '../types/api/IMetadataResponse';
 import ControlPanel from './ControlPanel';
 import Viz from './Viz';
 
 export default function App() {
-  // Example of how you could fetch data
+  const [metadata, setMetadata] = useState<IMetadataResponse>();
+  const [citation, setCitation] = useState<string>();
   useEffect(() => {
-    async function fetchData() {
-      const metadata = await api.fetchMetadata();
-      const citation = await api.fetchCitation();
-      const data = await api.fetchData({
-        location_name: ['Belize', 'Venezuela'],
-        year_name: [1990, 2015],
-        sex_name: ['Males', 'Females'],
-      });
-      console.log({ metadata, citation, data });
-    }
-    fetchData();
+    api.fetchMetadata().then(setMetadata);
+    api.fetchCitation().then(setCitation);
   }, []);
 
   return (
     <div className="App">
-      <ControlPanel />
+      <ControlPanel metadata={metadata} />
       <Viz />
+      {citation && <pre>{citation}</pre>}
     </div>
   );
 }

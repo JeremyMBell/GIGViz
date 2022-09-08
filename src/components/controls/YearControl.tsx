@@ -1,25 +1,43 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 
 import './YearControl.css';
 import React from 'react';
 import { YearEventHandler } from '../../types/EventHandlers';
+import { IYearMetadata } from '../../types/api/IYearMetadata';
 
 
 export interface IYearControlProps {
-  max: number,
-  min: number,
+  years: IYearMetadata[];
   step?: number,
   value: number,
   onChange: YearEventHandler,
 }
 
-export default function YearControl({ max, min, onChange, step = 1, value }: IYearControlProps) {
+type YearRange = [number, number];
+const defaultYears: YearRange = [Infinity, -Infinity];
+
+function calculateYears([min, max]: YearRange, year: IYearMetadata | undefined): YearRange {
+  if (year) {
+    return [Math.min(min, year.year_id), Math.max(max, year.year_id)];
+  } else {
+    return defaultYears;
+  }
+}
+
+export default function YearControl({ years, onChange, step = 1, value }: IYearControlProps) {
   const handelChange = useCallback<React.ChangeEventHandler<HTMLInputElement>>(
     (event) => {
       onChange(parseInt(event.target.value));
     },
     [onChange],
   );
+
+  const [[min, max], updateYears] = useReducer(calculateYears, defaultYears);
+
+  useEffect(() => {
+    updateYears(undefined); // reset the years
+    years.forEach(updateYears);
+  }, [years]);
 
   return (
     <div className="control">

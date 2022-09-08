@@ -6,8 +6,12 @@ import './ControlPanel.css';
 import React from 'react';
 import { SexEventHandler, YearEventHandler } from '../types/EventHandlers';
 import { Sex } from '../types/Sexes';
+import { IMetadataResponse } from '../types/api/IMetadataResponse';
 
-export default function ControlPanel() {
+interface IControlPanelProps {
+  metadata?: IMetadataResponse;
+}
+export default function ControlPanel({metadata}: IControlPanelProps) {
   const [sex, setSex] = useState<Sex>(Sex.Female);
   const [year, setYear] = useState<number>(2017);
 
@@ -27,8 +31,11 @@ export default function ControlPanel() {
 
   return (
     <div className="control-panel">
-      <SexControl value={sex} onChange={handelSexChange} />
-      <YearControl max={2017} min={1990} value={year} onChange={handelYearChange} />
+      {!metadata && <span>Loading...</span>}
+      {metadata && (<>
+        <SexControl sexes={metadata.sex} value={sex} onChange={handelSexChange} />
+        <YearControl years={metadata.year} value={year} onChange={handelYearChange} />
+      </>)}
     </div>
   );
 }
