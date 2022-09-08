@@ -4,17 +4,11 @@ import { Sex } from '../../types/Sexes';
 import { SexEventHandler } from '../../types/EventHandlers';
 import { ISexMetadata } from '../../types/api/ISexMetadata';
 
-const options = Object.values(Sex).map((sex) => ({
-  value: sex,
-  label: sex,
-}));
-
 export interface ISexControlProps {
   value: Sex,
   onChange: SexEventHandler,
   sexes: ISexMetadata[];
 }
-
 
 export default function SexControl({ onChange, value, sexes }: ISexControlProps) {
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(

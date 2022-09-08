@@ -1,4 +1,6 @@
 import axios from 'axios';
+import { IDataFetchRequest } from './types/api/IDataFetchRequest';
+import { IDataFetchResponse } from './types/api/IDataFetchResponse';
 import { ILocationMetadata } from './types/api/ILocationMetadata';
 import { IMetadataResponse } from './types/api/IMetadataResponse';
 import { ISexMetadata } from './types/api/ISexMetadata';
@@ -59,8 +61,8 @@ export async function fetchCitation() {
  *     sex_name: 'Females'
  *   })
  */
-export async function fetchData(params = {}) {
-  const { data } = await api.get('data', {
+export async function fetchData(params: IDataFetchRequest = {}) {
+  const { data } = await api.get<IDataFetchResponse>('data', {
     params,
   });
   return data;
