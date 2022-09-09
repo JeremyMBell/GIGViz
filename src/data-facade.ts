@@ -18,22 +18,35 @@ export function fetchDataWithControls(controls: IControlSelections, locations: I
     });
 }
 
+export const hashControls = (controls: IControlSelections): string => `${controls.sex};;${controls.year}`;
+
 export function dataReducer([_, map]: DataState, action: IDataReducerAction): DataState {
-    const hash = `${action.controls.sex};;${action.controls.year}`;
+    const hash = hashControls(action.controls);
     return [hash, map.set(hash, action.payload)];
 }
 
+/**
+ * BELOW: Reducers that filter for our visualizations
+ */
 export interface IFilterDataAction {
-    compareKey: keyof IDataFetchResponse;
+    compareKey: keyof IDataFetchResponse; // key for the datapoint that will be ploted
     item: IDataFetchResponse;
 }
+
 type FilterDataReducer = (selections: IDataFetchResponse[], action: IFilterDataAction | undefined) => IDataFetchResponse[];
+/**
+ * Returns a reducer that returns the maximum values on a compare key.
+ * @param numMax - number of values to include
+ * @returns a reducer that filters and sorts the data set by maximizing the compareKey
+ */
 const maxData = (numMax: number): FilterDataReducer => (selectedMax, action) => {
     if (!action) {
         return [];
     }
     const compareValue = action.item[action.compareKey];
     let spliced = false;
+
+    // essentially an insertion sort rewritten for this reducer
     for (let i = 0; i < selectedMax.length; i++) {
         if (compareValue <= selectedMax[i][action.compareKey]) {
             selectedMax.splice(i, 0, action.item);
@@ -41,13 +54,15 @@ const maxData = (numMax: number): FilterDataReducer => (selectedMax, action) => 
             break;
         }
     }
+
+    // if the value wasn't added, then that means it's larger than the current selections
     if (!spliced) {
         selectedMax.push(action.item);
     }
 
-    if (selectedMax.length >= numMax) {
+    if (selectedMax.length >= numMax) { // chop off excess
         return selectedMax.slice(selectedMax.length - numMax);
-    } else {
+    } else { // clone to prevent any mutation issues
         return selectedMax.concat();
     }
 };
