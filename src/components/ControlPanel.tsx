@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import { SexControl, YearControl }  from './controls';
 
@@ -29,6 +29,8 @@ export default function ControlPanel({metadata, onControlChange}: IControlPanelP
     (nextValue) => handleControlChange({year: nextValue, sex}),
     [handleControlChange],
   );
+
+  useEffect(() => onControlChange({sex, year}), [!metadata])
 
   return (
     <div className="control-panel">

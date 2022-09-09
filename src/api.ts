@@ -62,7 +62,7 @@ export async function fetchCitation() {
  *   })
  */
 export async function fetchData(params: IDataFetchRequest = {}) {
-  const { data } = await api.get<IDataFetchResponse>('data', {
+  const { data } = await api.get<IDataFetchResponse[]>('data', {
     params,
   });
   return data;
