@@ -1,7 +1,7 @@
-import React, { useEffect, useReducer } from 'react';
-import { VictoryAxis, VictoryBar, VictoryChart, VictoryContainer, VictoryLabel, VictoryTheme, VictoryTooltip } from 'victory';
-import { DataFilters, dataReducer, fetchDataWithControls, hashControls } from '../data-facade';
-import { ILocationMetadata } from '../types/api/ILocationMetadata';
+import React, { useEffect, useReducer, useState } from 'react';
+import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme, VictoryTooltip } from 'victory';
+import { DataFilters, FilterDataReducer, getData, IDataState } from '../data-facade';
+import { IDataFetchResponse } from '../types/api/IDataFetchResponse';
 import { IControlSelections } from '../types/IControlSelections';
 import './Viz.css';
 import { BarChartTooltip } from './viz/BarChartTooltip';
@@ -9,53 +9,63 @@ import { FlagLabel } from './viz/FlagLabel';
 
 interface IVizProps {
   controlSelection: IControlSelections;
-  locations: ILocationMetadata[];
+  data: IDataState;
+  years: number[];
+  dataFilter: FilterDataReducer;
+  staticTicks?: boolean;
+  title: string;
 }
 
 /**
  * Simple bar chart, with some incorporation of flags as labels for brevity
+ * @param controlSelection -- controls that were selected in the ControlPanel component
+ * @param data -- list of data that we have in memory
+ * @param dataFilter -- a reducer for determining which data to display
+ * @param staticTicks -- true if the ticks will be precalculated, rather than calculated by its plot data
+ * @param title -- title of the graph (without the qualifying control information)
  */
-export default function Viz({controlSelection, locations}: IVizProps) {
-  const [[dataKey, data], dispatchData] = useReducer(dataReducer, ['', new Map()]);
-  const [filteredData, dispatchDataFilter] = useReducer(DataFilters.maxData(controlSelection.numCountries), []);
-  const dataToPlot = data.get(dataKey);
-  /**
-   * Fetches data; if we need to
-   */
-  useEffect(() => {
-    if (data.has(hashControls(controlSelection))) {
-      return;
-    }
-
-    fetchDataWithControls(controlSelection, locations)
-      .then(payload => dispatchData({
-        controls: controlSelection,
-        payload,
-      }));
-  }, [controlSelection, locations]);
+export default function Viz({controlSelection, data, dataFilter, staticTicks, title}: IVizProps) {
+  const [filteredData, dispatchDataFilter] = useReducer(dataFilter, []);
+  const [ticks, setTicks] = useState<number[]>();
+  const tickSpacing = 5;
+  const dataToPlot = getData(data, controlSelection);
+  const y = 'mean';
 
   /**
    * Filters data if data exists
    */
   useEffect(() => {
     if (dataToPlot) {
-      dispatchDataFilter(undefined); // reset the filteredData
-      dataToPlot.forEach(item => {
-        dispatchDataFilter({
-          compareKey: 'mean',
-          item,
-        });
+      dispatchDataFilter({
+        compareKey: y,
+        data: dataToPlot,
       });
     }
   }, [dataToPlot]);
-  const chartTitle = [`Opioid Deaths per 100,000 for`, `${controlSelection.sex.toLowerCase()} in ${controlSelection.year}`];
+
+  useEffect(() => {
+    if (!staticTicks) {
+      return;
+    }
+    const findYValue = (datum: IDataFetchResponse) => datum[y];
+    const ys = Object.values(data.values)
+      .flatMap((value) => value.map(findYValue));
+    const minValue = Math.floor(Math.min(0, ...ys)/tickSpacing);
+    const maxValue = Math.ceil(Math.max(...ys)/tickSpacing);
+    const ticks = [];
+    for (let i = minValue; i <= maxValue; i++) {
+      ticks.push(i*tickSpacing);
+    }
+    setTicks(ticks);
+  }, [data]);
+
+  const chartTitle = [title, `for ${controlSelection.sex.toLowerCase()} in ${controlSelection.year}`];
   const titleFontSize = 12;
   const chartWidth = 400;
   return (
     <main className="BarChartViz">
       {dataToPlot && (
         <VictoryChart
-          animate={controlSelection.animate ? {duration: 100} : {}}
           title={chartTitle.join(" ")}
           domainPadding={20}
           theme={VictoryTheme.material}
@@ -70,6 +80,7 @@ export default function Viz({controlSelection, locations}: IVizProps) {
           <VictoryAxis
             dependentAxis
             label="Deaths per 100,000"
+            tickValues={staticTicks ? ticks : undefined}
             axisLabelComponent={<VictoryLabel dy={-20} />}
           />
           <VictoryAxis
@@ -84,8 +95,7 @@ export default function Viz({controlSelection, locations}: IVizProps) {
             ]}
             labelComponent={<VictoryTooltip flyoutComponent={<></>} labelComponent={<BarChartTooltip />} />}
             x="location_name"
-            y="mean"
-            sortKey="mean"
+            y={y}
           />
       </VictoryChart>
       )}

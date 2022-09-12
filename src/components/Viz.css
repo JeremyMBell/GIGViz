@@ -1,4 +1,5 @@
 .BarChartViz {
     margin: 8px;
-    max-width: 800px;
+    min-width: 600px;
+    height: 100%;
 }

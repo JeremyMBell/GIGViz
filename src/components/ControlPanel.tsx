@@ -12,7 +12,8 @@ import { NumControl } from './controls/NumControl';
 import { AnimationControl } from './controls/AnimationControl';
 
 interface IControlPanelProps {
-  metadata?: IMetadataResponse;
+  years: number[];
+  sexes: Sex[];
   onControlChange: ControlEventHandler;
 }
 
@@ -24,7 +25,7 @@ function controlSelectionReducer(state: IControlSelections, action: {type: strin
   return state;
 }
 
-export default function ControlPanel({metadata, onControlChange}: IControlPanelProps) {
+export default function ControlPanel({years, sexes, onControlChange}: IControlPanelProps) {
   const [selections, dispatchControlSelection] = useReducer(controlSelectionReducer, {sex: Sex.Both, year: 1990, numCountries: 10});
   const handleControlChange = useCallback((payload: IControlSelections) => {
     dispatchControlSelection({
@@ -54,17 +55,14 @@ export default function ControlPanel({metadata, onControlChange}: IControlPanelP
     [selections],
   );
 
-  useEffect(() => onControlChange(selections), [!metadata]);
+  useEffect(() => onControlChange(selections), [sexes, years]);
 
   return (
     <div className="control-panel">
-      {!metadata && <span>Loading...</span>}
-      {metadata && (<>
-        <SexControl sexes={metadata.sex} value={selections.sex} onChange={handleSexChange} />
-        <YearControl years={metadata.year} value={selections.year} onChange={handleYearChange} animate={selections.animate}  />
-        <NumControl value={selections.numCountries} onChange={handleNumChange} />
-        <AnimationControl value={selections.animate} onChange={handleAnimationChange} />
-      </>)}
+      <SexControl sexes={sexes} value={selections.sex} onChange={handleSexChange} />
+      <YearControl years={years} value={selections.year} onChange={handleYearChange} animate={selections.animate}  />
+      <NumControl value={selections.numCountries} onChange={handleNumChange} />
+      <AnimationControl value={selections.animate} onChange={handleAnimationChange} />
     </div>
   );
 }

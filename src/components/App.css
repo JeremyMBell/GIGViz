@@ -1,0 +1,6 @@
+.visualizations {
+    min-height: 500px;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+}

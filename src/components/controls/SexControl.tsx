@@ -7,7 +7,7 @@ import { ISexMetadata } from '../../types/api/ISexMetadata';
 export interface ISexControlProps {
   value: Sex,
   onChange: SexEventHandler,
-  sexes: ISexMetadata[];
+  sexes: Sex[];
 }
 
 export default function SexControl({ onChange, value, sexes }: ISexControlProps) {
@@ -22,17 +22,18 @@ export default function SexControl({ onChange, value, sexes }: ISexControlProps)
     <div className="control">
       <span className="control__label">Sex</span>
       <div className="selector-sex__options">
-        {sexes.map((option) => (
-          <Fragment key={option.sex_id}>
+        {sexes.length === 0 && <span>Loading sexes...</span>}
+        {sexes.map((sex) => (
+          <Fragment key={sex}>
             <input
-              checked={option.sex_name === value}
-              id={`sex-control-option-${option.sex_id}`}
+              checked={sex === value}
+              id={`sex-control-option-${sex}`}
               name="sex-control"
               type="radio"
-              value={option.sex_name}
+              value={sex}
               onChange={handleChange}
             />
-            <label htmlFor={`sex-control-option-${option.sex_id}`}>{option.sex_name}</label>
+            <label htmlFor={`sex-control-option-${sex}`}>{sex}</label>
           </Fragment>
         ))}
       </div>

@@ -1,72 +1,94 @@
+import { Dispatch } from "react";
 import { fetchData } from "./api";
 import { IDataFetchResponse } from "./types/api/IDataFetchResponse";
 import { ILocationMetadata } from "./types/api/ILocationMetadata";
 import { IControlSelections } from "./types/IControlSelections";
+import { Sex } from "./types/Sexes";
 
 export interface IDataReducerAction {
     controls: IControlSelections;
     payload: IDataFetchResponse[];
+    type: 'select-data' | 'store-data';
 }
 
-export type DataState<T extends string = string> = [T, Map<T, IDataFetchResponse[]>];
+export interface IDataState {
+    values: Record<string, IDataFetchResponse[]>;
+}
 
-export function fetchDataWithControls(controls: IControlSelections, locations: ILocationMetadata[]): Promise<IDataFetchResponse[]> {
-    return fetchData({
+export async function fetchDataWithControls(
+    data: IDataState,
+    controls: IControlSelections,
+    locations: string[],
+    dispatchData: Dispatch<IDataReducerAction>,
+): Promise<void> {
+    if (getData(data, controls)) {
+        return;
+    }
+    const payload = await fetchData({
         sex_name: controls.sex,
         year_id: controls.year,
-        location_id: locations.map((location) => location.location_id),
+        location_name: locations,
+    })
+    dispatchData({
+        controls,
+        payload,
+        type: 'store-data',
     });
 }
 
 export const hashControls = (controls: IControlSelections): string => `${controls.sex};;${controls.year}`;
 
-export function dataReducer([_, map]: DataState, action: IDataReducerAction): DataState {
-    const hash = hashControls(action.controls);
-    return [hash, map.set(hash, action.payload)];
-}
+export const getData = ({values}: IDataState, controls: IControlSelections) => values[hashControls(controls)];
+
+export const dataReducer =({values}: IDataState, action: IDataReducerAction): IDataState => {
+    const hashKey = hashControls(action.controls);
+    return {
+        values: {
+            ...values,
+            [hashKey]: action.payload,
+        },
+    };
+};
 
 /**
  * BELOW: Reducers that filter for our visualizations
  */
 export interface IFilterDataAction {
     compareKey: keyof IDataFetchResponse; // key for the datapoint that will be ploted
-    item: IDataFetchResponse;
+    data: IDataFetchResponse[];
 }
 
-type FilterDataReducer = (selections: IDataFetchResponse[], action: IFilterDataAction | undefined) => IDataFetchResponse[];
+export type FilterDataReducer = (selections: IDataFetchResponse[], action: IFilterDataAction) => IDataFetchResponse[];
 /**
  * Returns a reducer that returns the maximum values on a compare key.
  * @param numMax - number of values to include
- * @returns a reducer that filters and sorts the data set by maximizing the compareKey
+ * @returns a reducer that filters the dataset by maximum values of `action.compareKey`
  */
-const maxData = (numMax: number): FilterDataReducer => (selectedMax, action) => {
-    if (!action) {
-        return [];
-    }
-    const compareValue = action.item[action.compareKey];
-    let spliced = false;
-
-    // essentially an insertion sort rewritten for this reducer
-    for (let i = 0; i < selectedMax.length; i++) {
-        if (compareValue <= selectedMax[i][action.compareKey]) {
-            selectedMax.splice(i, 0, action.item);
-            spliced = true;
-            break;
-        }
-    }
-
-    // if the value wasn't added, then that means it's larger than the current selections
-    if (!spliced) {
-        selectedMax.push(action.item);
-    }
-
-    if (selectedMax.length >= numMax) { // chop off excess
-        return selectedMax.slice(selectedMax.length - numMax);
-    } else { // clone to prevent any mutation issues
-        return selectedMax.concat();
-    }
-};
+ const maxData = (numMax: number): FilterDataReducer => (oldMax, action) =>
+ // sort based on compare key -- using type-agnostic compare
+ // sorts in descending order
+ action.data.sort(({[action.compareKey]: a}, {[action.compareKey]: b}) =>
+     // if a is greater than b, then move it towards the front of the array
+     // Number(boolean) -- 1 if true, 0 if false, so a === b will return 0.
+     (b < a) ? -1 : Number(a !== b))
+ // grab the greatest `numMax` numbers
+ .slice(0, numMax);
+ /**
+ * Returns a reducer that returns the minimum values on a compare key.
+ * @param numMin - number of values to include
+ * @returns a reducer that filters the dataset by maximum values of `action.compareKey`
+ */
+const minData = (numMin: number): FilterDataReducer => (oldMin, action) =>
+    // sort based on compare key -- using type-agnostic compare
+    // sorts in ascending order
+    action.data.sort(({[action.compareKey]: a}, {[action.compareKey]: b}) =>
+        // if a is less than b, then move it towards the front of the array
+        // Number(boolean) -- 1 if true, 0 if false, so a === b will return 0.
+        (a < b) ? -1 : Number(a !== b))
+    // grab the greatest `numMax` numbers
+    .slice(0, numMin);
 
 export const DataFilters = {
     maxData,
+    minData,
 };
