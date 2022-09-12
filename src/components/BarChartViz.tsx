@@ -24,7 +24,7 @@ interface IVizProps {
  * @param staticTicks -- true if the ticks will be precalculated, rather than calculated by its plot data
  * @param title -- title of the graph (without the qualifying control information)
  */
-export default function Viz({controlSelection, data, dataFilter, staticTicks, title}: IVizProps) {
+export default function BarChartViz({controlSelection, data, dataFilter, staticTicks, title}: IVizProps) {
   const [filteredData, dispatchDataFilter] = useReducer(dataFilter, []);
   const [ticks, setTicks] = useState<number[]>();
   const tickSpacing = 5;

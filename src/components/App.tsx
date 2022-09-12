@@ -6,7 +6,7 @@ import { DataFilters, dataReducer, fetchDataWithControls, hashControls } from '.
 import { calculateLocations, calculateSexes, calculateYears, fetchMetadata } from '../metadata-facade';
 import { IControlSelections } from '../types/IControlSelections';
 import ControlPanel from './ControlPanel';
-import Viz from './Viz';
+import BarChartViz from './BarChartViz';
 import './App.css';
 
 export default function App() {
@@ -47,7 +47,7 @@ export default function App() {
         onControlChange={setControlSelection} />
       {controlSelection && (
         <div className="visualizations">
-          <Viz
+          <BarChartViz
             years={years}
             controlSelection={controlSelection}
             data={data}
@@ -55,7 +55,7 @@ export default function App() {
             title="Countries with Most Opioid Deaths per capita"
             staticTicks
           />
-          <Viz
+          <BarChartViz
             years={years}
             controlSelection={controlSelection}
             data={data}
