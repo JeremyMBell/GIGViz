@@ -3,7 +3,7 @@ import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme, Vict
 import { DataFilters, FilterDataReducer, getData, IDataState } from '../data-facade';
 import { IDataFetchResponse } from '../types/api/IDataFetchResponse';
 import { IControlSelections } from '../types/IControlSelections';
-import './Viz.css';
+import './BarChartViz.css';
 import { BarChartTooltip } from './viz/BarChartTooltip';
 import { FlagLabel } from './viz/FlagLabel';
 
