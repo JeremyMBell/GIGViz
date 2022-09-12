@@ -1,6 +1,6 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme, VictoryTooltip } from 'victory';
-import { DataFilters, FilterDataReducer, getData, IDataState } from '../data-facade';
+import { FilterDataReducer, getData, IDataState } from '../data-facade';
 import { IDataFetchResponse } from '../types/api/IDataFetchResponse';
 import { IControlSelections } from '../types/IControlSelections';
 import './BarChartViz.css';
@@ -11,8 +11,8 @@ interface IVizProps {
   controlSelection: IControlSelections;
   data: IDataState;
   years: number[];
-  dataFilter: FilterDataReducer;
-  staticTicks?: boolean;
+  dataFilter: FilterDataReducer<IDataFetchResponse>;
+  staticTicks?: number[];
   title: string;
 }
 
@@ -21,13 +21,11 @@ interface IVizProps {
  * @param controlSelection -- controls that were selected in the ControlPanel component
  * @param data -- list of data that we have in memory
  * @param dataFilter -- a reducer for determining which data to display
- * @param staticTicks -- true if the ticks will be precalculated, rather than calculated by its plot data
+ * @param staticTicks -- if provided, it's an array of ticks for the y axis, otherwise, will be dynamically calculated
  * @param title -- title of the graph (without the qualifying control information)
  */
 export default function BarChartViz({controlSelection, data, dataFilter, staticTicks, title}: IVizProps) {
   const [filteredData, dispatchDataFilter] = useReducer(dataFilter, []);
-  const [ticks, setTicks] = useState<number[]>();
-  const tickSpacing = 5;
   const dataToPlot = getData(data, controlSelection);
   const y = 'mean';
 
@@ -43,25 +41,9 @@ export default function BarChartViz({controlSelection, data, dataFilter, staticT
     }
   }, [dataToPlot]);
 
-  useEffect(() => {
-    if (!staticTicks) {
-      return;
-    }
-    const findYValue = (datum: IDataFetchResponse) => datum[y];
-    const ys = Object.values(data.values)
-      .flatMap((value) => value.map(findYValue));
-    const minValue = Math.floor(Math.min(0, ...ys)/tickSpacing);
-    const maxValue = Math.ceil(Math.max(...ys)/tickSpacing);
-    const ticks = [];
-    for (let i = minValue; i <= maxValue; i++) {
-      ticks.push(i*tickSpacing);
-    }
-    setTicks(ticks);
-  }, [data]);
-
   const chartTitle = [title, `for ${controlSelection.sex.toLowerCase()} in ${controlSelection.year}`];
   const titleFontSize = 12;
-  const chartWidth = 400;
+  const chartWidth = 600;
   return (
     <main className="BarChartViz">
       {dataToPlot && (
@@ -70,7 +52,7 @@ export default function BarChartViz({controlSelection, data, dataFilter, staticT
           domainPadding={20}
           theme={VictoryTheme.material}
           width={chartWidth}
-          height={250}>
+          height={350}>
           <VictoryLabel
             text={chartTitle}
             x={chartWidth/2}
@@ -80,7 +62,7 @@ export default function BarChartViz({controlSelection, data, dataFilter, staticT
           <VictoryAxis
             dependentAxis
             label="Deaths per 100,000"
-            tickValues={staticTicks ? ticks : undefined}
+            tickValues={staticTicks}
             axisLabelComponent={<VictoryLabel dy={-20} />}
           />
           <VictoryAxis

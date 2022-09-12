@@ -8,6 +8,8 @@ import { IControlSelections } from '../types/IControlSelections';
 import ControlPanel from './ControlPanel';
 import BarChartViz from './BarChartViz';
 import './App.css';
+import { DeltaViz } from './viz/DeltaViz';
+import { IDataFetchResponse } from '../types/api/IDataFetchResponse';
 
 export default function App() {
   const [years, dispatchYearMetadata] = useReducer(calculateYears, []);
@@ -16,6 +18,7 @@ export default function App() {
   const [citation, setCitation] = useState<string>();
   const [controlSelection, setControlSelection] = useState<IControlSelections>();
   const [data, dispatchData] = useReducer(dataReducer, {values: {}});
+  const [ticks, setTicks] = useState<number[]>();
   useEffect(() => {
     fetchMetadata(dispatchYearMetadata, dispatchSexMetadata, dispatchLocationMetadata);
     api.fetchCitation().then(setCitation);
@@ -39,6 +42,19 @@ export default function App() {
         dispatchData
     )));
   }, [controlSelection && controlSelection.sex, locations, years]);
+  
+  useEffect(() => {
+    const tickSpacing = 5;
+    const findYValue = (datum: IDataFetchResponse) => datum.mean;
+    const ys = Object.values(data.values).flat().map(findYValue);
+    const minValue = Math.floor(Math.min(0, ...ys)/tickSpacing);
+    const maxValue = Math.ceil(Math.max(...ys)/tickSpacing);
+    const ticks = [];
+    for (let i = minValue; i <= maxValue; i++) {
+      ticks.push(i*tickSpacing);
+    }
+    setTicks(ticks);
+  }, [data]);
   return (
     <div className="App">
       <ControlPanel
@@ -51,16 +67,14 @@ export default function App() {
             years={years}
             controlSelection={controlSelection}
             data={data}
-            dataFilter={DataFilters.maxData(controlSelection.numCountries)}
+            dataFilter={DataFilters.maxData<IDataFetchResponse>(controlSelection.numCountries)}
             title="Countries with Most Opioid Deaths per capita"
-            staticTicks
+            staticTicks={ticks}
           />
-          <BarChartViz
-            years={years}
-            controlSelection={controlSelection}
+          <DeltaViz
+            controls={controlSelection}
             data={data}
-            dataFilter={DataFilters.minData(controlSelection.numCountries)}
-            title="Countries with Least Opioid Deaths per capita"
+            staticTicks={ticks}
           />
         </div>
       )}
