@@ -42,6 +42,9 @@ export const DeltaViz: React.FC<IDeltaVizProps> = ({data, controls, staticTicks}
          */
         setMinMaxPerLocation(
             deltaData.reduce(([newMinMax, newMinMaxYear]: [MinMaxPerLocation, MinMaxYearPerLocation], delta) => {
+                if (delta.sex !== controls.sex) {
+                    return [newMinMax, newMinMaxYear];
+                }
                 const currentValue = newMinMax[delta.location];
                 const currentYearValue = newMinMaxYear[delta.location];
                 // if it's in the map, commence compares!
@@ -107,7 +110,7 @@ export const DeltaViz: React.FC<IDeltaVizProps> = ({data, controls, staticTicks}
                     style={{fontSize: titleFontSize}} />
                 {filteredDeltaData.length === 0 && (
                     <VictoryLabel
-                        text={`No delta data for ${controls.year - 1}-${controls.year}`}
+                        text={`No data for range ${controls.year - 1}-${controls.year}`}
                         x={chartWidth/2}
                         y={chartHeight/2}
                         textAnchor="middle"
@@ -154,10 +157,10 @@ export const DeltaViz: React.FC<IDeltaVizProps> = ({data, controls, staticTicks}
                                 `${datum.startYear}-${datum.endYear} change: ${datum.delta > 0 ? '+' : ''}${datum.delta.toFixed(4)}`,
                                 `---`,
                                 `Year with LEAST deaths: ${lowYear}`,
-                                `${low} deaths per 100,000`,
+                                `${low.toFixed(4)} deaths per 100,000`,
                                 `---`,
                                 `Year with MOST deaths: ${highYear}`,
-                                `${high} deaths per 100,000`,
+                                `${high.toFixed(4)} deaths per 100,000`,
                             ];
                         }}
                         labelComponent={

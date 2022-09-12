@@ -4,3 +4,10 @@
     align-items: stretch;
     justify-content: space-between;
 }
+p {
+    text-indent: .25in;
+}
+img.flag {
+    height: 1em;
+    width: auto;
+}

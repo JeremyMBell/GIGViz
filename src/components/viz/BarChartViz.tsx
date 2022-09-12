@@ -1,11 +1,11 @@
 import React, { useEffect, useReducer } from 'react';
 import { VictoryAxis, VictoryBar, VictoryChart, VictoryLabel, VictoryTheme, VictoryTooltip } from 'victory';
-import { FilterDataReducer, getData, IDataState } from '../data-facade';
-import { IDataFetchResponse } from '../types/api/IDataFetchResponse';
-import { IControlSelections } from '../types/IControlSelections';
+import { FilterDataReducer, getData, IDataState } from '../../data-facade';
+import { IDataFetchResponse } from '../../types/api/IDataFetchResponse';
+import { IControlSelections } from '../../types/IControlSelections';
 import './BarChartViz.css';
-import { BarChartTooltip } from './viz/BarChartTooltip';
-import { FlagLabel } from './viz/FlagLabel';
+import { BarChartTooltip } from './BarChartTooltip';
+import { FlagLabel } from './FlagLabel';
 
 interface IVizProps {
   controlSelection: IControlSelections;

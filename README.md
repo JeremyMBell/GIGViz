@@ -1,3 +1,5 @@
+# See [CHANGELOG.md](./CHANGELOG.md) for progression of project
+
 # Data Visualization Coding Challenge - Instructions
 
 ## Objective

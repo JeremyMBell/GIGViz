@@ -2,6 +2,8 @@ import type { CustomLabelProps } from "../../types/VictoryProps";
 import React from 'react';
 
 const DEFAULT_FLAG_SIZE = 20;
+
+export const flagHref = (locationName: string) => `https://countryflagsapi.com/png/${locationName.toLowerCase()}`
 /**
  * Displays Flag as if it were a label
  * @prop text -- the name of the location
@@ -15,7 +17,7 @@ export const FlagLabel: React.FC<CustomLabelProps<'text'> & {flagSize?: number}>
   return (
     <g className="FlagLabel">
         <image
-        href={`https://countryflagsapi.com/png/${locationName.toLowerCase()}`}
+        href={flagHref(locationName)}
         x={imageX}
         y={y}
         width={flagSize}
