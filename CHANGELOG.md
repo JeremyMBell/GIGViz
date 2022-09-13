@@ -27,3 +27,7 @@
 - **Added Candlestick chart for new year-over-year delta data**
 - I also tried experimenting more with other filtering methodologies, like filtering for minimum. However, the minimums were harder to pull a story from, and certainly doesn't indicate who is *most* impacted.
 - `react-simple-maps` would be good if there was a wider scope to this project. During this time, I found that I needed more data from the API to build out a heatmap which would've been a great addition to the visualization. Specifically, I need a latitude and longitude of the countries. The location name is not always enough which I've noticed with the flags visualization.
+
+## Sept. 12
+
+- **Added [`RETROSPECTIVE.md`](./RETROSPECTIVE.md) for general thoughts on the project.**
