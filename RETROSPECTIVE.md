@@ -9,7 +9,7 @@ Listed in no particular order.
 In short-term projects, it's hard to determine what developer experience upgrades are worth investing in. We could've gone further with developer experience upgrades:
 
 - Adding linting - this would help enforce a consistent code style. It would be nice in a multi-collaborator and longterm project environment, but with short deadlines, linting doesn't make sense. HOWEVER, it is always better to implement linting earlier to prevent large refactor pull requests.
-- Adding utility functions - for instance, the flag API I used is all hosted in the `FlagLabel` component, when the flag API could be its own file. This is relatively low-cost, but also not much high reward. In short-term projects, there is a lot of setup and teardown of code, which doesn't always make sense.
+- Adding utility functions - for instance, the flag API I used is all hosted in the `FlagLabel` component, when the flag API could be its own file. This is relatively low-cost, but also not much high reward. In short-term projects, there is a lot of setup and teardown of code, which doesn't always make sense for utility functions to stick around.
 
 ## Creating the data-facade was a good choice.
 
@@ -33,12 +33,14 @@ Victory had the pro of having a lot of common code in place for me. It also uses
 
 Tooltips took awhile to spin up, and I'm not fully satisfied with how the tooltips came out. They base their tooltips based on an array of strings, and I can't modify much from it.
 
-It seems like Victory just had a highly opinionated system that I couldn't fully grapple with. Alternatively, I could've not using a React library and just use React for the controls.
+It seems like Victory just had a highly opinionated system that I couldn't fully grapple with. Alternatively, I could've not used a React library and just use React for the controls.
 
 ## Heatmap would've been great
 
 Touched upon this in the [CHANGELOG](./CHANGELOG.md). I think the heatmap would solve a flaw with my project. We could only see the results for 10 countries (or more if you up the number). But a heatmap wouldn't apply the level of filter. It would also be able to show how different countries change during the opioid crisis. I know that South Africa hit a minimum in 2014, but I would've liked to know more about the data in the following years.
 
+Creating a map using the location data provided wasn't the most feasible solution. The Flag API was something I was lucky to stumble upon, which brings me to...
+
 ## I like the addition of flags
 
-I think one thing that was terrible when I first booted up Victory was the label overlap. Even rotating to make it legible made the visualization look busy and unusable. The flags were the perfect shorthand to make the graph axes look less bloated. It also tied together iconography that a user could identify with. For instance, I can connect with the US flag and see it move around the charts as I played back the years.
+One thing that was terrible when I first booted up Victory was the label overlap. Even rotating to make it legible made the visualization look busy and unusable. The flags were the perfect shorthand to make the graph axes look less bloated. It also tied together iconography that a user could identify with. For instance, I can connect with the US flag and see it move around the charts as I played back the years.
